@@ -1,0 +1,284 @@
+/* 全局设置 */
+.containerIndex {
+  height: 100%;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 5px;
+  font-weight: 100;
+  text-align-last: left;
+}
+
+
+
+
+
+/* 首页logo与搜索框*/
+.logo {
+  height: 100px;
+  width: 100%;
+}
+.logo img{
+  margin-top: 28px;
+  height: 60px;
+}
+
+.serach {
+  display: flex;
+  height: 40px;
+  margin-top: 32px;
+  border: 3px solid rgba(255, 153, 0, 1);
+}
+
+.serach input {
+  border: 0;
+  margin: 0 5px;
+  outline: none;
+  width: 80%;
+}
+
+.serach button {
+  border: 0;
+  color: #FFFFFF;
+  outline: none;
+  width: 20%;
+  background-color: #F90;
+}
+
+.serach button:hover {
+  font-size: 15px;
+  cursor: pointer;
+}
+
+
+
+/* 首页导航栏 */
+.sortlist  {
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 28px;
+  text-align-last: center;
+}
+
+.sortlist li {
+  float: left;
+  line-height: 50px;
+  margin: 0 20px;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+}
+.sortlist li:hover{
+  color: #ff6700;
+}
+
+/* 首页幻灯片 */
+.slide{
+  margin-bottom: 20px;
+  padding: 10px 0;
+}
+.slideUl {
+  height: 460px;
+  position: absolute;
+  z-index: 99999;
+  width: 230px;
+  padding: 20px 0;
+  margin-bottom: 10px;
+  background: rgba(105,101,101,.6);
+
+}
+
+.slideUl li{
+  line-height: 42px;
+  width: 200px;
+  margin-bottom: 5px;
+  padding-left: 30px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+}
+.slideUl li:hover{
+  background-color: #FF8800;
+  cursor: pointer;
+}
+.slideUlclick{
+  float: right;
+  display: block;
+  width: 20px;
+  height: 30px;
+  margin-top: 10px;
+  background-image: url(../../static/img/icon/goto.png);
+  background-repeat: no-repeat;
+  background-size: 60%;
+  padding-right: 20px;
+}
+
+
+
+.block{
+  width: 100%;
+}
+.el-carousel{
+  height: 500px;
+  width: 100%;
+}
+.block img{
+  width: 100%;
+  height: 500px;
+}
+
+
+
+/* 首页热门商品*/
+.center {
+  border-radius: 10px;
+  padding: 0;
+  margin-top: 12px;
+}
+
+.hot-product {
+  margin-top: 10px;
+  height: 600px;
+}
+
+.hot-product ul {
+  width: 100%;
+}
+
+.hot-product ul li {
+  float: left;
+  width: 47%;
+  height: 280px;
+  font-size: 15px;
+  margin: 0 0.5%;
+  margin-bottom: 0.5%;
+  padding: 0 1%;
+  border-radius: 15px;
+  text-align-last: left;
+  background-color: #FFFFFF;
+  box-shadow: 2px 4px 8px #555555;
+  overflow: hidden;
+}
+
+.hot-product p {
+  font-size: 20px;
+  font-weight: 600;
+  padding: 3px 10px;
+  margin: 7px;
+  margin-top: 20px;
+}
+
+.hot-product ul li div {
+  border-top: 3px solid rgba(37, 41, 41, 0.5);
+}
+
+.hot-product ul li ul {
+  clear: all;
+}
+
+.hot-product ul li ul li {
+  height: 100%;
+  width: 97%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0 0 0;
+  line-height: 40px;
+  cursor: pointer;
+  /* 下划线-虚线*/
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.2);
+  /* 超出隐藏*/
+  overflow: hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  transition: font-size 0.2s;
+}
+.hot-product ul li ul li:hover{
+  color: #FF8800;
+  font-size: 16px;
+}
+
+
+
+
+
+/* 首页最新上架商品展示栏*/
+.new {
+  padding-bottom: 20px;
+  background-color: #ffffff;
+}
+
+.typeProduct li{
+  width: calc(25% - 8px);
+  margin: 10px 2px;
+  float: left;
+  padding-bottom: 10px;
+}
+
+.containerProduct{
+  width: 220px;
+  height: 300px;
+  margin: auto;
+  transition: all 0.2s;
+  border-radius: 5px;
+  box-shadow: 0 1px 5px #999999;
+  background-color: #fcfcfc;
+}
+.containerProduct:hover{
+  box-shadow: 0 1px 10px #999999;
+  transform: translateY(-0.5%);
+}
+
+.typeProduct li .imgbox{
+  width: 220px;
+  height: 200px;
+  overflow: hidden;
+  }
+.typeProduct li img{
+  width: 220px;
+  height: 200px;
+  background-repeat: no-repeat;
+  background-position:center center;
+  background-size: cover;
+  cursor: pointer;
+}
+.typeProduct li p{
+  margin: 5px 10px;
+  line-height: 20px;
+  text-align: left;
+}
+.productPrice{
+  color: #FF5500;
+  font-weight: 700;
+}
+.productPrice .price{
+  font-size: 16px !important;
+}
+.productName{
+  height: 20px;
+  width: 80%;
+  color: #555555;
+  font-size: 14px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.userPlay{
+  width: 100%;
+  height: 20px;
+  margin-top: 15px;
+}
+.userPlay span{
+  margin-left: 10px;
+}
+.userPlay button{
+  float: right !important;
+  font-size: 10px;
+  height: 20px;
+  color: #FFFFFF;
+  background-color: #FF5500;
+  border-radius: 3px;
+  margin: 0 10px;
+  cursor: pointer;
+}
