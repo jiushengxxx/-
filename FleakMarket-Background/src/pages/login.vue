@@ -1,7 +1,7 @@
 <template>
   <div class="Logincontainer">
     <div class="loginContainer">
-      <p>唐院二手交易市场后台管理系统</p>
+      <p>蚌院二手交易市场后台管理系统</p>
       <el-form :model="loginForm" :rules="rules" ref="loginForm" label-width="100px" class="demo-ruleForm">
         <el-form-item class="login" label="用户名" prop="username">
           <el-input v-model="loginForm.username"></el-input>
@@ -80,7 +80,9 @@
                   status:1
                 });
 
-                this.$router.push('/index');
+                if (this.$route.path !== '/index') {
+                  this.$router.push('/index');
+                }
               }else{
                 this.$message({
                   type: 'warning',

@@ -2,6 +2,7 @@
   <div class="addproduct">
     <!-- 商品添加模块表单 -->
     <el-form ref="productData" :model="productData"  :rules="rules" label-width="80px">
+      <!-- 原有代码：发布人、发布时间行 -->
       <el-row>
         <el-col :span="8">
           <el-form-item label="发布人">
@@ -14,18 +15,22 @@
           </el-form-item>
         </el-col>
       </el-row>
+
+      <!-- 原有代码：商品名称、商品类别行 -->
       <el-row>
         <el-col :span="8">
           <el-form-item label="商品名称" prop="name">
             <el-input v-model="productData.name"></el-input>
           </el-form-item>
         </el-col>
-          <el-col :span="8" :offset="1">
-            <el-form-item label="商品类别" prop="sid">
-              <el-cascader v-model="productData.sid" :options="productTypeItem" :props="{ expandTrigger: 'hover' }"></el-cascader>
-            </el-form-item>
-          </el-col>
+        <el-col :span="8" :offset="1">
+          <el-form-item label="商品类别" prop="sid">
+            <el-cascader v-model="productData.sid" :options="productTypeItem" :props="{ expandTrigger: 'hover' }"></el-cascader>
+          </el-form-item>
+        </el-col>
       </el-row>
+
+      <!-- 原有代码：商品售价、商品原价行 -->
       <el-row>
         <el-col :span="8">
           <el-form-item label="商品售价" prop="currentprice">
@@ -38,15 +43,33 @@
           </el-form-item>
         </el-col>
       </el-row>
+
+      <!-- 👇 核心修改：交易方式 + 商品成色 同一行布局 -->
       <el-row>
+        <!-- 交易方式：左（span=8） -->
         <el-col :span="8">
           <el-form-item label="交易方式" prop="deal">
             <el-select v-model="productData.deal" placeholder="请选择交易方式">
-              <el-option v-for="item in dealItem" :value="item" :key="item.sid"></el-option>
+              <el-option v-for="item in dealItem" :value="item" :key="item"></el-option>
             </el-select>
           </el-form-item>
         </el-col>
+        <!-- 商品成色：右（span=8 + offset=1，和商品原价布局一致） -->
+        <el-col :span="8" :offset="1">
+          <el-form-item label="商品成色" prop="condition">
+            <el-select v-model="productData.condition" placeholder="请选择商品成色">
+              <el-option
+                v-for="item in conditionItem"
+                :key="item"
+                :label="item"
+                :value="item">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
       </el-row>
+
+      <!-- 原有代码：商品图片、交易地址、商品描述、按钮行 -->
       <el-row>
         <el-col :span="20">
           <el-form-item label="商品图片">
@@ -88,7 +111,6 @@
     </el-form>
   </div>
 </template>
-
 <script>
   import moment from "moment";
   export default{
@@ -104,17 +126,29 @@
           currentprice: '',//商品售价
           originalprice: '',//商品原价
           deal: '',//交易方式
+          condition: '',//商品新旧程度（新增）
           address: '',//交易地址
           details: '',//商品详情
           images: ''//商品图片
-        },//商品数据
+        },
         productType: '',//商品类型
         productTypeItem: [],//商品类型选项
         dealItem: ['线上交易','线下交易'],//交易类型数组
         formDate:"",//图片数据
         dialogImageUrl: '',//弹出层图片
         dialogVisible: false,//弹出层控制器
+        conditionItem: [
+          '全新未拆封',
+          '几乎全新',
+          '9成新',
+          '8成新',
+          '7成新',
+          '6成新及以下'
+        ],//商品新旧程度
         rules: {
+          condition: [
+            { required: true, message: '请选择商品成色', trigger: 'change' }
+          ],
           name: [
             { required: true, message: '请输入商品名称', trigger: 'blur' },
             { min: 0, max: 30, message: '长度在 0 到 30 个字符', trigger: 'blur' }
@@ -210,18 +244,20 @@
         //商品种类序列化
         this.productData.sid = this.productData.sid[1];
         //发布商品
-        this.$axios.post('/product/insertProductByUser', {
-          uid: this.User.id,
-          name: this.productData.name,
-          creattime: this.productData.creattime,
-          sid: this.productData.sid,
-          currentprice: this.productData.currentprice,
-          originalprice: this.productData.originalprice,
-          deal: this.productData.deal,
-          address: this.productData.address,
-          details: this.productData.details,
-          images: this.productData.images
-        }).then(res => {
+          this.$axios.post('/product/insertProductByUser', {
+            uid: this.User.id,
+            name: this.productData.name,
+            creattime: this.productData.creattime,
+            sid: this.productData.sid,
+            currentprice: this.productData.currentprice,
+            originalprice: this.productData.originalprice,
+            deal: this.productData.deal,
+            // 👇 关键修改：添加condition字段，把前端选择的成色值传给后端
+            condition: this.productData.condition,
+            address: this.productData.address,
+            details: this.productData.details,
+            images: this.productData.images
+          }).then(res => {
           if(res.data == 1){
             this.$message({
               message: '商品发布成功！',

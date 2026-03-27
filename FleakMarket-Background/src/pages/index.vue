@@ -19,7 +19,7 @@
           </el-dropdown-menu>
         </el-dropdown>
         <span>
-           <a href="http://localhost:81/#/" target="view_window" style="color: #FFFFFF;">前台首页</a>
+           <a href="http://localhost:8081/#/" target="view_window" style="color: #FFFFFF;">前台首页</a>
         </span>
       </el-col>
     </el-row>

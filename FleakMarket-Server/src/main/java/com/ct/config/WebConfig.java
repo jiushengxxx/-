@@ -9,39 +9,43 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 import java.io.File;
 
 /**
- * @className: WebMvcConfigurationSupport
- * @Description: 静态资源配置类
- * @author: ct
- * @date: 2022/2/20 11:25
+ * 静态资源配置类
  */
 @Configuration
 public class WebConfig extends WebMvcConfigurationSupport {
 
-    //绑定文件上传路径到uploadPath
+    // 读取 application.yml 的上传路径
     @Value("${web.upload-path}")
     private String uploadPath;
 
     /**
-     * 配置静态访问资源
-     * @param registry
+     * 配置静态资源访问
      */
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+
+        // 1 项目静态资源
         registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:static/")
+                .addResourceLocations("classpath:/static/");
+
+        // 2 上传图片访问路径
+        registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:" + uploadPath + File.separator);
+
+        super.addResourceHandlers(registry);
     }
 
     /**
-     * 后端跨域配置
-     * @param registry
-     * */
+     * 跨域配置
+     */
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
+    protected void addCorsMappings(CorsRegistry registry) {
+
         registry.addMapping("/**")
                 .allowedOrigins("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowCredentials(true)
-                .allowedMethods("GET", "POST", "DELETE", "PUT")
                 .maxAge(3600);
+
     }
 }

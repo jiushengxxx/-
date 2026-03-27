@@ -4,19 +4,22 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/market?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 1000MB
+
   mail:
-    host: smtp.163.com
-    port: 465   # 使用 SSL/TLS 推荐端口
-    username: t18713827231@163.com
-    password: RWNKORILLAUDXFJE
+    host: smtp.qq.com
+    port: 465
+    username: 2750394702@qq.com
+    password: mkkiczxalswhdcia
     default-encoding: utf-8
     properties:
       mail:
         smtp:
+          auth: true
           ssl:
             enable: true
         debug: true
@@ -28,9 +31,27 @@ mybatis:
 server:
   port: 8080
 
-# 本地文件上传配置，建议用相对路径更通用
 web:
-  upload-path: ./src/main/resources/static/images
+  # 图片实际保存位置（必须是真实磁盘路径）
+  upload-path: D:/upload/images/
 
-  # 支付宝前端响应地址
-  ipAddr: http://localhost:8080/
+  # 前端访问图片地址
+  ipAddr: http://localhost:8080/images/
+
+#alipay:
+#  app-id: 9021000162625527
+#  private-key: MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCLXB9YKX6Vtw9ur9F9jBnhKxiP8XXnmyW4opaf2O6FKTQz08TPtOQ9Nr8XZk8wEJbgujxU/rb01If4DdauuKFIJEg7I9ppQouro6H+biCHn1akrayTc5g88kMHNwulT7puYfZ9B8Tq2/gvHx6LNADD02nr/Ep7tx0RAnklqjrKRvyA37bnP0K4rsb9Q8OC1dnkXagVKJumRG+FmNVs3pjTnbFTW+EeCXzZ/z35Q59QbmjdxJQmCEcRwS5BAs/B/E94rDu0HWwRRqq9yhMwPUA7d/fZuq3frM7cZ7ZNeDmtHNnZh0Q7i0clbBvLifUSpqd77nJQlgTFUdesaA5TAnzTAgMBAAECggEAGvnUH2640CZFWHm0JYdPIyUCdiqZViHUJW9jlMGbOi+FqVqeyE4NuEO2rcLiJT2w1wN11kYQCEhzoXKcUenvXlWXncsM5j85Zhogq22J4nbXgL0VoN1JZNLIYscm+/L49ZEE86LjXUsDOaveb7e7RizQXhvSFyyU9cvyw3W2N51IO19X4Dubpnj42ziv6vQqwTtMMj8WLEtvhIbxIoxmFcLIpG+BEnLZ9v4H5kPnfV3WcVhQiIkTKVw6O0lQ7GCRaf4R/et2isC7YkOGBfztATc/iBnSqWDLpxtIcQXyeskaBoJLhA7irbAwazICGzVR5nJhAT3GBCdKkmDUXJ6+EQKBgQDZoNNFO3oJx20obuI70TgzRaXg/Y4UvuDKNpucTlHcyoEg+b08RyO6MkZfkA+71X2tyAVBbl7wNznEqQ22hXCNZnFHu999suUiCOKkHLoltVIknylc5fUTj5qDPByaTeHTNcWlkn6ECDfkGU1Urx8wt8YJU6ObvecoeJfsL4vQ5wKBgQCj7ncraeoIWRawwR88oeoOo3BaX3+O8qhNCw4PUTXT7NepgoA5ClEmBfYoJEXQKauEqBNQR1laWyq3DZ1Fra8JVa5r9WMsb+lhlAh7hEwx2VLPkbd7IHlGVx1cyxWRjeUA6p79qMyyZMi8+b7CbXga31q/2Wo2THID4hji8l07NQKBgCfyq5Vjy40L/G+VmxWb3BMdT8uy/2ezehPkXkAc6E39JiLldOUhsd8151EXYqv6Dm3d74kJN4gkuwfseEXuzLBIA7dFN0sdkY3jz6aMV2cgl4l9ZdxVod0LWTOJzz5L2Y4pqrQv5eValNfcBSPsWW9Z7JI9tiSagVoeeNS0DZg1AoGAaXE3Qbtsh1YWXDa8CtnynNvPprGKcL3wNy4HKx8HSnsq9KM2KnpSW+y1ungqV4yWAEvDsH1UIeRGA1xEbs8aqRxtho9d7PVG3jbDhf9Aq0eoFk8Z/56RowbhohAWnXrxc7d18J6km5Jr8/GIG7Mh79b+niwQP0DIjWreqwtNoIkCgYA/zyayz5yFobj4a8stJrV7JS9WNWfUSb+QAeuC/cn4I1pJ2vwh5e60YrhKwnvl/JiFohwVeVAxgwuul/Ad6Oq/gvrAfGfvb45DBNiiRCVVu6PyRAtisVA0YXsyfzjPKFFomd9f8xXq9WCyUst/f+3NycVSSeU31UbTKnCoRJIoUg==
+#  alipay-public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqSAb4lkfucOr/FRaiZKun1f48SVCvR/TOyMVWK9TRpPy8TGG5SRWTz7/ngcJgRi+iX8118oV4v0BlsYtWpvypbRXpNYwW/4fSdf1Gb1oZtsO/sGld5dvgkn0MrHWTmbYB6DcrI/Gu0fZcAvcVXwIlB3cVs9WtJIJRTSoXU+CgbhiQz/hT6Ps0n73qeWLgvlJSLIJDIyL0Y0hC0WFkjh8ylQBrOqnhVrGhWmoyXxNZWdg9/Tz2MxdXFJ7IWHkRfB8CUP2Uy9hKAMNd37lX+HTGnaFKGsJ5bbrLZW/zkTMhWhxdxWUn28L0HnwvP6exbapKamTJ+sZro8CDVTo53I5MQIDAQAB
+#  notify-url: http://rcbddb9a.natappfree.cc
+#  return-url: http://localhost:8081/paySuccess
+#  gateway-url: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+alipay:
+  app-id: 9021000162625527
+  # 新增这一行！解决 alipayService 找不到配置的问题
+  merchant-private-key: MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCLXB9YKX6Vtw9ur9F9jBnhKxiP8XXnmyW4opaf2O6FKTQz08TPtOQ9Nr8XZk8wEJbgujxU/rb01If4DdauuKFIJEg7I9ppQouro6H+biCHn1akrayTc5g88kMHNwulT7puYfZ9B8Tq2/gvHx6LNADD02nr/Ep7tx0RAnklqjrKRvyA37bnP0K4rsb9Q8OC1dnkXagVKJumRG+FmNVs3pjTnbFTW+EeCXzZ/z35Q59QbmjdxJQmCEcRwS5BAs/B/E94rDu0HWwRRqq9yhMwPUA7d/fZuq3frM7cZ7ZNeDmtHNnZh0Q7i0clbBvLifUSpqd77nJQlgTFUdesaA5TAnzTAgMBAAECggEAGvnUH2640CZFWHm0JYdPIyUCdiqZViHUJW9jlMGbOi+FqVqeyE4NuEO2rcLiJT2w1wN11kYQCEhzoXKcUenvXlWXncsM5j85Zhogq22J4nbXgL0VoN1JZNLIYscm+/L49ZEE86LjXUsDOaveb7e7RizQXhvSFyyU9cvyw3W2N51IO19X4Dubpnj42ziv6vQqwTtMMj8WLEtvhIbxIoxmFcLIpG+BEnLZ9v4H5kPnfV3WcVhQiIkTKVw6O0lQ7GCRaf4R/et2isC7YkOGBfztATc/iBnSqWDLpxtIcQXyeskaBoJLhA7irbAwazICGzVR5nJhAT3GBCdKkmDUXJ6+EQKBgQDZoNNFO3oJx20obuI70TgzRaXg/Y4UvuDKNpucTlHcyoEg+b08RyO6MkZfkA+71X2tyAVBbl7wNznEqQ22hXCNZnFHu999suUiCOKkHLoltVIknylc5fUTj5qDPByaTeHTNcWlkn6ECDfkGU1Urx8wt8YJU6ObvecoeJfsL4vQ5wKBgQCj7ncraeoIWRawwR88oeoOo3BaX3+O8qhNCw4PUTXT7NepgoA5ClEmBfYoJEXQKauEqBNQR1laWyq3DZ1Fra8JVa5r9WMsb+lhlAh7hEwx2VLPkbd7IHlGVx1cyxWRjeUA6p79qMyyZMi8+b7CbXga31q/2Wo2THID4hji8l07NQKBgCfyq5Vjy40L/G+VmxWb3BMdT8uy/2ezehPkXkAc6E39JiLldOUhsd8151EXYqv6Dm3d74kJN4gkuwfseEXuzLBIA7dFN0sdkY3jz6aMV2cgl4l9ZdxVod0LWTOJzz5L2Y4pqrQv5eValNfcBSPsWW9Z7JI9tiSagVoeeNS0DZg1AoGAaXE3Qbtsh1YWXDa8CtnynNvPprGKcL3wNy4HKx8HSnsq9KM2KnpSW+y1ungqV4yWAEvDsH1UIeRGA1xEbs8aqRxtho9d7PVG3jbDhf9Aq0eoFk8Z/56RowbhohAWnXrxc7d18J6km5Jr8/GIG7Mh79b+niwQP0DIjWreqwtNoIkCgYA/zyayz5yFobj4a8stJrV7JS9WNWfUSb+QAeuC/cn4I1pJ2vwh5e60YrhKwnvl/JiFohwVeVAxgwuul/Ad6Oq/gvrAfGfvb45DBNiiRCVVu6PyRAtisVA0YXsyfzjPKFFomd9f8xXq9WCyUst/f+3NycVSSeU31UbTKnCoRJIoUg==
+  # 保留原来的 private-key，适配 OrderService
+  private-key: ${alipay.merchant-private-key}
+  alipay-public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqSAb4lkfucOr/FRaiZKun1f48SVCvR/TOyMVWK9TRpPy8TGG5SRWTz7/ngcJgRi+iX8118oV4v0BlsYtWpvypbRXpNYwW/4fSdf1Gb1oZtsO/sGld5dvgkn0MrHWTmbYB6DcrI/Gu0fZcAvcVXwIlB3cVs9WtJIJRTSoXU+CgbhiQz/hT6Ps0n73qeWLgvlJSLIJDIyL0Y0hC0WFkjh8ylQBrOqnhVrGhWmoyXxNZWdg9/Tz2MxdXFJ7IWHkRfB8CUP2Uy9hKAMNd37lX+HTGnaFKGsJ5bbrLZW/zkTMhWhxdxWUn28L0HnwvP6exbapKamTJ+sZro8CDVTo53I5MQIDAQAB
+  notify-url: http://rcbddb9a.natappfree.cc
+  return-url: http://localhost:8081/paySuccess
+  gateway-url: https://openapi-sandbox.dl.alipaydev.com/gateway.do

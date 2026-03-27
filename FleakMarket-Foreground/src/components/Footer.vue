@@ -35,14 +35,14 @@
         </el-col>
         <el-col :span="4">
           <div class="phone">
-            <p>187-138-27231</p>
+            <p>195-561-39174</p>
             <span>周一至周日 9:00-18:00</span>
           </div>
         </el-col>
      </el-row>
 
      <el-row class="copyright">
-       <el-col>Copyright © 2459550727@qq.com&nbsp;陈拓</el-col>
+       <el-col>Copyright © 2750394702@qq.com&nbsp;付豪</el-col>
      </el-row>
   </div>
 </template>

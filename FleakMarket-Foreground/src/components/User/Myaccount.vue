@@ -60,10 +60,10 @@
               <el-upload
                 action=""
                 :limit="1"
-                :multiple="true"
+                :multiple="false"
                 list-type="picture-card"
-                :auto-upload="false"
-                :http-request="uploadFile"
+                :auto-upload="true"
+                :http-request="handleAvatarUpload"
                 ref="upload"
                 :on-remove="handleRemove">
                 <i class="el-icon-plus"></i>
@@ -277,25 +277,26 @@
         this.$refs[userData].validate((valid) => {
           console.log(valid);
           if(valid) {
-            //提交图片，得到图片地址
-            this.subPicForm();
-            setTimeout(res => {
-              this.updateUser();
-            },500);
+            // 直接更新用户信息（头像在上传时已写入 userData.userimgpath）
+            this.updateUser();
           }
         });
       },
-      //上传图片方法
-      subPicForm(){
-        this.formDate = new FormData();
-        this.$refs.upload.submit();
-        let config = {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
+      // 上传头像并立即写入 userData.userimgpath 与 imgPath
+      handleAvatarUpload({ file }){
+        const formData = new FormData();
+        formData.append('file', file);
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
         };
-        this.$axios.post("/fileUpload/imgUpload", this.formDate,config).then( res => {
-          this.userData.userimgpath = res.data[0];
+        this.$axios.post('/fileUpload/imgUpload', formData, config).then(res => {
+          const urls = res.data || [];
+          if (urls.length > 0) {
+            this.userData.userimgpath = urls[0];
+            this.imgPath = urls[0];
+          }
         });
       },
       updateUser(){
@@ -329,10 +330,6 @@
 
           }
         });
-      },
-      //上传图片
-      uploadFile(file){
-        this.formDate.append('file', file.file);
       },
       //移除图片
       handleRemove(file, fileList) {

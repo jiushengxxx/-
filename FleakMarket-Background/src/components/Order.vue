@@ -116,14 +116,21 @@
     methods:{
       //加载订单列表
       loadOrderData(){
-        this.$axios.post('/order/selectOrderByList',{
-          oid:this.formInline.oid,
-          pay:this.formInline.pay,
-          phone:this.formInline.phone
+        this.$axios.post('/order/list',{
+        params: {
+          oid: this.formInline.oid,
+          pay: this.formInline.pay,
+          phone: this.formInline.phone
+        }
         }).then(res => {
-          this.OrderData = res.data;
-        })
-      },
+          // 确保返回的是数组
+             this.OrderData = res.data.data
+             console.log("OrderData:",this.OrderData.data)
+           }).catch(err => {
+             console.error('加载订单失败', err);
+             this.OrderData = []
+           })
+         },
       RestSubmit() {
         this.formInline = {
           oid: null,

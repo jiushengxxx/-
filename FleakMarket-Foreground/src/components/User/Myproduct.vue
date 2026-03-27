@@ -593,6 +593,7 @@ export default {
       };
       if (this.ifUpload) {
         this.$axios.post("/fileUpload/imgUpload", this.formDate, config).then(res => {
+          console.log('上传返回：', res.data);
           //重组文件列表
           res.data.forEach(resi => {
             this.fileUrl.push(resi);

@@ -16,6 +16,8 @@ public class Product {
     //商品图片
     private String images;
     //商品点击量
+    private String condition;
+    // 商品成色
     private int clicks;
     //商品创建时间
     private String creattime;

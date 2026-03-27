@@ -35,7 +35,8 @@ public class Order {
     private String address;
     //订单备注
     private String remark;
-
+    // 支付宝交易号
+    private String tradeNo;
     //商品id
     private List<Integer> pid;
     //商品列表

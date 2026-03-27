@@ -41,7 +41,7 @@
   </update>
 
   <insert id="insertUserInfo" parameterType="User" useGeneratedKeys="true" keyProperty="id">
-    insert into user(username,phonenumber,mail,birthday,address,sex) values(
+    insert into user(username,phonenumber,mail,birthday,address,sex,studentNo) values(
       <trim prefix="" suffixOverrides=",">
         <if test="username!=null">
           #{username},
@@ -61,6 +61,9 @@
         <if test="sex!=null">
           #{sex},
         </if>
+          <if test="studentNo!=null">
+              #{studentNo},
+          </if>
       </trim>
     )
   </insert>

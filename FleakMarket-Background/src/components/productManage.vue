@@ -93,8 +93,15 @@
               </el-form-item>
             </el-col>
               <el-col :span="8" :offset="1">
+                <!-- 👇 修复1：级联选择器绑定sid，同时保留productItem用于回显 -->
                 <el-form-item label="商品类别" prop="sid">
-                  <el-cascader v-model="productItem" @change="updateSid" :options="productTypeItem" :props="{ expandTrigger: 'hover' }"></el-cascader>
+                  <el-cascader
+                    v-model="productItem"
+                    @change="updateSid"
+                    :options="productTypeItem"
+                    :props="{ expandTrigger: 'hover' }"
+                    placeholder="请选择商品类型">
+                  </el-cascader>
                 </el-form-item>
               </el-col>
           </el-row>
@@ -114,7 +121,7 @@
             <el-col :span="8">
               <el-form-item label="交易方式" prop="deal">
                 <el-select v-model="productItemData.deal" placeholder="请选择交易方式">
-                  <el-option v-for="item in dealItem" :value="item"></el-option>
+                  <el-option v-for="item in dealItem" :value="item" :key="item"></el-option>
                 </el-select>
               </el-form-item>
             </el-col>
@@ -148,14 +155,14 @@
           <el-row>
             <el-col :span="20">
               <el-form-item label="商品描述" prop="details">
-                <el-input type="textarea" v-model="productItemData.details" rows="5"maxlength="100" placeholder="请填写商品描述"></el-input>
+                <el-input type="textarea" v-model="productItemData.details" rows="5" maxlength="100" placeholder="请填写商品描述"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row>
             <el-col :span="20" :offset="3">
               <el-button type="primary" @click="submitForm('productItemData')">确认修改</el-button>
-              <el-button @click="loadProductDetail(productItemData.id)" type="info">重置</el-button>
+              <el-button @click="resetForm()" type="info">重置</el-button>
             </el-col>
           </el-row>
         </el-form>
@@ -181,36 +188,39 @@
         dialogVisible: false,//修改商品弹窗
         ifUpload: false,//判断是否操作了图片
         dealItem: ['线上交易','线下交易','面谈'],//交易类型数组
-        productItemData: '',
+        productItemData: {}, // 👇 修复2：初始化为对象，避免undefined
         fileList: [],//文件列表
         fileUrl: [],//文件地址
-        productItem: [],
+        productItem: [], // 级联选择器绑定值（[一级分类ID, 二级分类ID]）
         productType: [],//商品类型
         productTypeItem: [],//商品类型选项
         rules: {
           name: [
             { required: true, message: '请输入商品名称', trigger: 'blur' },
-            { min: 0, max: 15, message: '长度在 0 到 15 个字符', trigger: 'blur' }
+            { min: 1, max: 15, message: '长度在 1 到 15 个字符', trigger: 'blur' } // 修复：min=1，避免空字符串
           ],
           sid: [
-            { required: true, message: '请选择商品类型', trigger: 'blur' }
+            { required: true, message: '请选择商品类型', trigger: 'change' }, // 修复3：trigger改为change，匹配级联选择器
+            { type: 'number', message: '商品类型选择异常', trigger: 'change' }
           ],
           currentprice: [
             { required: true, message: '请输入商品售价', trigger: 'blur' },
-            { type: 'number', min: 0, message: '请输入正确的价格', trigger: 'blur' }
+            { type: 'number', min: 0.01, message: '请输入大于0的价格', trigger: 'blur' } // 修复：min=0.01，避免0元
           ],
           originalprice: [
             { required: true, message: '请输入商品原价', trigger: 'blur' },
-            { type: 'number', min: 0, message: '请输入正确的价格', trigger: 'blur' }
+            { type: 'number', min: 0.01, message: '请输入大于0的价格', trigger: 'blur' }
           ],
           deal: [
-            { required: true, message: '请选择交易方式', trigger: 'blur' }
+            { required: true, message: '请选择交易方式', trigger: 'change' } // 修复：trigger改为change
           ],
           address: [
-            { required: true, message: '请填写交易地址', trigger: 'blur' }
+            { required: true, message: '请填写交易地址', trigger: 'blur' },
+            { min: 1, max: 50, message: '地址长度1-50字符', trigger: 'blur' }
           ],
           details: [
-            { required: true, message: '请填写商品描述', trigger: 'blur' }
+            { required: true, message: '请填写商品描述', trigger: 'blur' },
+            { min: 1, max: 100, message: '描述长度1-100字符', trigger: 'blur' }
           ]
         }
       }
@@ -221,7 +231,9 @@
 
       //请求一二级分类数据
       this.$axios.get('/classify/selectFcScByList', {}).then(res => {
+        if (!res.data || res.data.length === 0) return;
         let i = 0;
+        this.productTypeItem = []; // 初始化数组，避免重复
         res.data.forEach((data,index) =>{
           if(index == 0){
             this.productTypeItem.push({value:data.id,label: data.name,children:[{value:data.sid,label: data.sname}]});
@@ -232,6 +244,9 @@
             this.productTypeItem[i].children.push({value:data.sid,label: data.sname});
           }
         })
+      }).catch(err => {
+        console.error('加载分类数据失败：', err);
+        this.$message.error('分类数据加载失败，请刷新页面');
       });
     },
     methods:{
@@ -244,7 +259,10 @@
           status: this.formInline.status
         }).then(res => {
           console.log(res);
-          this.ProductData = res.data;
+          this.ProductData = res.data || []; // 容错：避免null
+        }).catch(err => {
+          console.error('加载商品列表失败：', err);
+          this.$message.error('商品列表加载失败');
         });
       },
       RestSubmit(){
@@ -258,6 +276,7 @@
       },
       //商品发布与下架
       statusClick(id,status) {
+        if (!id) return; // 容错：id为空不请求
         let text = status==1?'发布成功！':'下架成功！';
         this.$axios.post('/product/updateProductByUser',{
           id:id,
@@ -270,30 +289,50 @@
             });
           }
           this.loadData();
+        }).catch(err => {
+          console.error('修改商品状态失败：', err);
+          this.$message.error('操作失败，请重试');
         });
       },
       //加载商品详情信息
-      loadProductDetail(res){
+      loadProductDetail(row){
+        if (!row || !row.id) return; // 容错：行数据为空不处理
+        // 👇 修复4：清空旧数据，避免回显重复
+        this.fileList = [];
+        this.fileUrl = [];
+        this.productItem = [];
+        this.productItemData = {...row}; // 深拷贝，避免修改原数据
         this.dialogVisible = true;
-          this.productItemData = res;
-           //图片回显
-           let images = eval('('+res.images+')');
-           if(images != undefined){
-             images.forEach(res => {
-               this.fileList.push({url:res});
-             });
-           }
-          //商品分类数据回显
-          this.$axios.get('/classify/selectScById',{
-            params: {
-              id: res.sid
-            }
-          }).then(resi => {
-            this.productItem = [];
-            this.productItem.push(resi.data.fcid);
-            this.productItem.push(resi.data.id);
-            this.productItemData.sid = resi.data.id;
+
+        //图片回显
+        try {
+          let images = row.images ? JSON.parse(row.images) : []; // 修复：用JSON.parse替代eval，更安全
+          images.forEach(imgUrl => {
+            if (imgUrl) this.fileList.push({url: imgUrl});
           });
+        } catch (e) {
+          console.error('图片回显失败：', e);
+          this.fileList = [];
+        }
+
+        //商品分类数据回显 - 👇 修复5：校验sid是否合法，避免传空值给后端
+        if (row.sid && row.sid > 0) {
+          this.$axios.get('/classify/selectScById',{
+            params: { id: row.sid }
+          }).then(resi => {
+            if (resi.data && resi.data.fcid && resi.data.id) {
+              this.productItem = [resi.data.fcid, resi.data.id]; // 级联选择器回显
+              this.productItemData.sid = resi.data.id; // 绑定表单校验的sid
+            } else {
+              this.$message.warning('商品分类数据异常，请重新选择');
+            }
+          }).catch(err => {
+            console.error('加载分类详情失败：', err);
+            this.$message.error('分类回显失败，请手动选择商品类型');
+          });
+        } else {
+          this.$message.warning('商品分类ID异常，请手动选择');
+        }
       },
       //提交商品表单
       submitForm(productData) {
@@ -302,6 +341,7 @@
             //提交图片，得到图片地址
             this.subPicForm();
           } else {
+            this.$message.warning('表单填写不完整，请检查');
             return false;
           }
         });
@@ -309,28 +349,34 @@
       //上传图片方法
       subPicForm(){
           this.formDate = new FormData();
-          this.$refs.upload.submit();
+          // 👇 修复6：先判断是否有上传组件，避免报错
+          if (this.$refs.upload) this.$refs.upload.submit();
           let config = {
-              headers: {
-                  'Content-Type': 'multipart/form-data'
-              }
+              headers: { 'Content-Type': 'multipart/form-data' }
           };
           if(this.ifUpload){
-            this.$axios.post("/fileUpload/imgUpload", this.formDate,config).then( res => {
-              //重组文件列表
-              res.data.forEach(resi => {
-                this.fileUrl.push(resi);
-              });
+            this.$axios.post("/fileUpload/imgUpload", this.formDate, config).then( res => {
+              this.fileUrl = res.data || []; // 重置fileUrl
               //文件列表数组字符串化
-              this.productItemData.images = JSON.stringify( this.fileUrl );
+              this.productItemData.images = JSON.stringify(this.fileUrl);
               this.subProForm();
+            }).catch(err => {
+              console.error('图片上传失败：', err);
+              this.$message.error('图片上传失败，请重试');
             });
-          }else {
+          } else {
+            // 未上传新图片，沿用旧图片
+            this.productItemData.images = this.productItemData.images || '[]';
             this.subProForm();
           }
       },
       //修改商品方法
       subProForm(){
+        // 容错：必填字段校验
+        if (!this.productItemData.id || !this.productItemData.sid) {
+          this.$message.error('商品ID或分类异常，无法提交');
+          return;
+        }
         //发布商品
         this.$axios.post('/product/updateProductByUser', {
           id: this.productItemData.id,
@@ -351,20 +397,26 @@
               message: '商品修改成功！',
               type: 'success'
             });
-
+          } else {
+            this.$message.warning('商品修改失败，请检查数据');
           }
-        })
+        }).catch(err => {
+          console.error('修改商品失败：', err);
+          this.$message.error('修改商品失败，请重试');
+        });
       },
       //上传图片
       uploadFile(file){
-        this.formDate.append('file', file.file);
+        if (file && file.file) {
+          this.formDate.append('file', file.file);
+        }
       },
       //更改图片
-      handleChange(value,fileList) {
+      handleChange(value, fileList) {
         this.ifUpload = true;
         this.fileUrl = [];
         fileList.forEach(res => {
-          if(res.status == "success"){
+          if(res.status == "success" && res.url){
             this.fileUrl.push(res.url);
           }
         });
@@ -374,66 +426,71 @@
         this.ifUpload = true;
         this.fileUrl = [];
         fileList.forEach(res => {
-          if(res.status == "success"){
+          if(res.status == "success" && res.url){
             this.fileUrl.push(res.url);
           }
         });
       },
-      //监听商品类型改变方法
+      //监听商品类型改变方法 - 👇 修复7：修正为productItemData，绑定sid
       updateSid(value){
-        this.productData.sid = value[1];
+        if (value && value.length >= 2) {
+          this.productItemData.sid = value[1]; // 二级分类ID赋值给sid
+        } else {
+          this.productItemData.sid = ''; // 清空，触发校验
+        }
       },
       //请求商品分类数据
       loadSidProduct(){
         this.$axios.get('/classify/selectFcScByList',{}).then(res => {
-          this.SData = res.data;
-        })
+          this.SData = res.data || [];
+        }).catch(err => {
+          console.error('加载分类列表失败：', err);
+        });
       },
-      //评论跳转页
+      //分页-改变当前页
       CurrentChange(val) {
-        // 改变默认的页数
-        this.currentPage=val;
+        this.currentPage = val;
       },
-      //改变每页显示条数
+      //分页-改变每页显示条数
       SizeChange(val) {
         this.PageSize = val;
+        this.currentPage = 1; // 重置为第一页
       },
-      //关闭修改弹窗回调方法
+      //关闭修改弹窗回调方法 - 👇 修复8：清空正确的变量，避免undefined
       closedialog(){
         this.dialogVisible = false;
-        this.productData = '';
+        this.productItemData = {};
+        this.productItem = [];
         this.fileList = [];
         this.fileUrl = [];
+        this.ifUpload = false;
+        // 重置表单校验
+        if (this.$refs.productItemData) {
+          this.$refs.productItemData.resetFields();
+        }
+      },
+      // 重置表单（弹窗内的重置按钮）
+      resetForm() {
+        if (this.productItemData.id) {
+          this.loadProductDetail(this.productItemData); // 重新加载原始数据
+        } else {
+          this.closedialog();
+        }
       },
       //首页推荐
       toRecommend(pid,index){
-        if(index==1){
-          //添加推荐
-          this.$axios.get('/Bproduct/insertRecommendByPid',{
-            params: {
-              pid: pid
-            }
-          }).then(res => {
-            this.$message({
-              message: '推荐成功！',
-              type: 'success'
-            });
-            this.loadData();
-          });
-        }else{
-          //取消推荐
-          this.$axios.get('/Bproduct/deleteRecommendByPid',{
-            params: {
-              pid: pid
-            }
-          }).then(res => {
-            this.$message({
-              message: '取消成功！',
-              type: 'success'
-            });
-            this.loadData();
-          });
-        }
+        if (!pid) return; // 容错：pid为空不请求
+        const api = index === 1 ? '/Bproduct/insertRecommendByPid' : '/Bproduct/deleteRecommendByPid';
+        const msg = index === 1 ? '推荐成功！' : '取消成功！';
+        this.$axios.get(api,{
+          params: { pid: pid }
+        }).then(res => {
+          this.$message({ message: msg, type: 'success' });
+          this.loadData();
+        }).catch(err => {
+          console.error('推荐操作失败：', err);
+          this.$message.error('操作失败，请重试');
+        });
       }
     }
   }

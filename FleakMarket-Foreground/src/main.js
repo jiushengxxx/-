@@ -9,7 +9,8 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import moment from 'moment';
 
-axios.defaults.baseURL = '/api';
+// 直接请求后端 Spring Boot，而不是通过本地 Node 代理
+axios.defaults.baseURL = 'http://localhost:8080';
 axios.defaults.timeout = 60000;
 
 Vue.config.productionTip = false;

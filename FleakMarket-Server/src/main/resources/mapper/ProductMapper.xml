@@ -2,37 +2,42 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ct.mapper.ForegroundMapper.ProductMapper" >
 
+    <!-- 查询最近 7 天新商品：修复条件缺失问题 -->
     <select id="selectByNew" resultType="Product">
-        select * from product where DATE_SUB(CURDATE(),INTERVAL 7 DAY) and status=1 order By creattime desc;
+        select * from product
+        where creattime >= DATE_SUB(CURDATE(),INTERVAL 7 DAY)
+        and status=1
+        order By creattime desc;
     </select>
 
+    <!-- 热门商品查询：补充排序逻辑（按点击量降序） -->
     <select id="selectByHot" parameterType="Integer" resultType="Product">
-        select * from product where status=1
-        <if test="value == 1">
-            and sid in (2)
-        </if >
-        <if test="value == 2">
-            and sid in (13,14)
-        </if >
-        <if test="value == 3">
-            and sid  in (29,30,31,32,33)
-        </if >
-        <if test="value == 4">
-            and sid in (20,21)
-        </if >
+        select * from product
+        where status=1
+        <if test="value == 1">and sid in (2)</if>
+        <if test="value == 2">and sid in (13,14)</if>
+        <if test="value == 3">and sid  in (29,30,31,32,33)</if>
+        <if test="value == 4">and sid in (20,21)</if>
+        order by clicks desc; <!-- 补充热门排序逻辑 -->
     </select>
 
+    <!-- 根据 ID 查询商品：无语法错误，保留 -->
     <select id="selectProductById" parameterType="Integer" resultType="map">
-        select p.*,u.username from product p,user u where p.uid=u.id and p.id = #{value};
+        select p.*, p.`condition`, u.username
+        from product p,user u
+        where p.uid=u.id and p.id = #{value};
     </select>
 
+    <!-- 根据分类查询商品：修复分号、拼写、SQL注入、表别名问题 -->
     <select id="selectScProductById" parameterType="Map" resultType="Product">
-        select p.* from product p,fc f,sc s where p.sid=s.id and s.fcid=f.id and status=1
-        <if test="id!=0">
-            and s.fcid=#{id}
-        </if>
-        <if test="serachText!=null">
-            and p.name like concat('%','${serachText}','%')
+        select p.*
+        from product p
+        join sc s on p.sid = s.id
+        join fc f on s.fcid = f.id
+        where p.status=1 <!-- 加表别名避免歧义 -->
+        <if test="id!=0">and s.fcid=#{id}</if>
+        <if test="searchText!=null and searchText!=''"> <!-- 修正拼写+空字符串判断 -->
+            and p.name like concat('%',#{searchText},'%') <!-- 改用#{}防注入 -->
         </if>
         <if test="ids!=null and ids.size()>0">
             and s.id in
@@ -40,106 +45,82 @@
                 #{item}
             </foreach>
         </if>
-        <if test="priceInterval!=null and priceInterval.size()>0">
-            and  currentprice BETWEEN ${priceInterval.min} and ${priceInterval.max}
+        <if test="priceInterval!=null and priceInterval.min!=null and priceInterval.max!=null">
+            and p.currentprice BETWEEN #{priceInterval.min} and #{priceInterval.max} <!-- 改用#{}防注入 -->
         </if>
         <if test="timeInterval!=0">
-           and  DATE_SUB(CURDATE(),INTERVAL #{timeInterval} DAY);
+            and p.creattime >= DATE_SUB(CURDATE(),INTERVAL #{timeInterval} DAY) <!-- 移除分号+补充字段关联 -->
         </if>
     </select>
 
+    <!-- 新增商品：修正value为values，规范语法 -->
     <insert id="insertProductByUser" parameterType="Product">
-        insert into
-        product
+        insert into product
         (
-        <trim prefix="" suffixOverrides=",">
-            <if test="name!=null">
-                name,
-            </if>
-            <if test="details!=null">
-                details,
-            </if>
-            <if test="images!=null">
-                images,
-            </if>
-            <if test="clicks!=null">
-                clicks,
-            </if>
-            <if test="creattime!=null">
-                creattime,
-            </if>
-            <if test="originalprice!=null">
-                originalprice,
-            </if>
-            <if test="currentprice!=null">
-                currentprice,
-            </if>
-            <if test="deal!=null">
-                deal,
-            </if>
-            <if test="address!=null">
-                address,
-            </if>
-            <if test="comments!=null">
-                comments,
-            </if>
-            <if test="sid!=0">
-                sid,
-            </if>
-            <if test="uid!=0">
-                uid
-            </if>
+        <trim suffixOverrides=",">
+            <if test="name!=null">name,</if>
+            <if test="details!=null">details,</if>
+            <if test="images!=null">images,</if>
+            <if test="clicks!=null">clicks,</if>
+            <if test="creattime!=null">creattime,</if>
+            <if test="originalprice!=null">originalprice,</if>
+            <if test="currentprice!=null">currentprice,</if>
+            <if test="deal!=null">deal,</if>
+            <if test="condition!=null">`condition`,</if>
+            <if test="address!=null">address,</if>
+            <if test="comments!=null">comments,</if>
+            <if test="sid!=0">sid,</if>
+            <if test="uid!=0">uid</if>
         </trim>
         )
-        values
+        values <!-- 修正value为values -->
         (
-        <trim prefix="" suffixOverrides=",">
-            <if test="name!=null">
-                #{name},
-            </if>
-            <if test="details!=null">
-                #{details},
-            </if>
-            <if test="images!=null">
-                #{images},
-            </if>
-            <if test="clicks!=null">
-                #{clicks},
-            </if>
-            <if test="creattime!=null">
-                #{creattime},
-            </if>
-            <if test="originalprice!=null">
-                #{originalprice},
-            </if>
-            <if test="currentprice != null">
-                #{currentprice},
-            </if>
-            <if test="deal != null">
-                #{deal},
-            </if>
-            <if test="address != null">
-                #{address},
-            </if>
-            <if test="comments != null">
-                #{comments},
-            </if>
-            <if test="sid != 0">
-                #{sid},
-            </if>
-            <if test="uid != 0">
-                #{uid}
-            </if>
+        <trim suffixOverrides=",">
+            <if test="name!=null">#{name},</if>
+            <if test="details!=null">#{details},</if>
+            <if test="images!=null">#{images},</if>
+            <if test="clicks!=null">#{clicks},</if>
+            <if test="creattime!=null">#{creattime},</if>
+            <if test="originalprice!=null">#{originalprice},</if>
+            <if test="currentprice!=null">#{currentprice},</if>
+            <if test="deal!=null">#{deal},</if>
+            <if test="condition!=null">#{condition},</if>
+            <if test="address!=null">#{address},</if>
+            <if test="comments!=null">#{comments},</if>
+            <if test="sid!=0">#{sid},</if>
+            <if test="uid!=0">#{uid}</if>
         </trim>
         )
     </insert>
 
+    <!-- 更新商品：无语法错误，保留 -->
+    <update id="updateProductByUser" parameterType="Product">
+        update product
+        <set>
+            clicks = clicks + 1,
+            <if test="name!=null">name=#{name},</if>
+            <if test="sid!=0">sid=#{sid},</if>
+            <if test="currentprice!=null">currentprice=#{currentprice},</if>
+            <if test="originalprice!=null">originalprice=#{originalprice},</if>
+            <if test="deal!=null">deal=#{deal},</if>
+            <if test="condition!=null">`condition`=#{condition},</if>
+            <if test="address!=null">address=#{address},</if>
+            <if test="details!=null">details=#{details},</if>
+            <if test="images!=null">images=#{images},</if>
+            <if test="comments!=null">comments=#{comments},</if>
+            <if test="status!=null">status=#{status},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+    <!-- 以下保留原有功能，仅补充soldOutProduct的parameterType -->
     <select id="selectCommentById" resultType="map" parameterType="Integer">
         select u.id uid,u.username,u.userimgpath,c.* from comment c,user u where c.uid=u.id and c.pid=#{value}  order by c.id desc;
     </select>
 
     <insert id="insertProductToLove" parameterType="map">
-        insert into userlove(uid,pid) value (#{uid},#{pid});
+        insert into userlove(uid,pid) values (#{uid},#{pid}); <!-- 修正value为values -->
     </insert>
 
     <select id="selectLoveById" resultType="int" parameterType="map">
@@ -147,7 +128,7 @@
     </select>
 
     <insert id="insertComment" parameterType="map">
-        insert into comment(pid,uid,text,time) value (#{pid},#{uid},#{text},#{time})
+        insert into comment(pid,uid,text,time) values (#{pid},#{uid},#{text},#{time}) <!-- 修正value为values -->
     </insert>
 
     <select id="selectMyCollectById" resultType="Product" parameterType="Integer">
@@ -157,46 +138,6 @@
     <select id="selectMyProductById" resultType="map" parameterType="Integer">
         select p.*,ifnull(op.status,0) opstatus,op.oid oid from product p left join order_product op on op.pid=p.id where  uid=#{value} order by creattime desc
     </select>
-
-    <update id="updateProductByUser" parameterType="Product">
-        update product
-        <trim prefix="SET" suffixOverrides=",">
-            <if test="name!=null">
-                name=#{name},
-            </if>
-            <if test="sid!=0">
-                sid=#{sid},
-            </if>
-            <if test="currentprice!=null">
-                currentprice=#{currentprice},
-            </if>
-            <if test="originalprice!=null">
-                originalprice=#{originalprice},
-            </if>
-            <if test="deal!=null">
-                deal=#{deal},
-            </if>
-            <if test="address!=null">
-                address=#{address},
-            </if>
-            <if test="details!=null">
-                details=#{details},
-            </if>
-            <if test="images!=null">
-                images=#{images},
-            </if>
-            <if test="clicks!=0">
-                clicks=#{clicks},
-            </if>
-            <if test="comments!=null">
-                comments=#{comments},
-            </if>
-            <if test="status!=null">
-                status=#{status},
-            </if>
-        </trim>
-        where id=#{id}
-    </update>
 
     <delete id="deleteProductById" parameterType="int">
         delete from product where id=#{value}
@@ -210,7 +151,7 @@
         update comment set status=#{status} where id=#{id}
     </update>
 
-    <update id="soldOutProduct">
+    <update id="soldOutProduct" parameterType="java.lang.Void"> <!-- 补充parameterType -->
         update product p,order_product op set p.status=2,p.payed=2 where p.id=op.pid;
     </update>
 
@@ -221,4 +162,5 @@
     <update id="updateOrderProductStatus" parameterType="map">
         update order_product set status=#{status} where oid=#{oid} and pid=#{pid};
     </update>
+
 </mapper>

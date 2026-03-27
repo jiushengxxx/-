@@ -8,6 +8,8 @@ public class User {
     private int id;
     //姓名
     private String username;
+    //学号
+    private String studentNo;
     //用户头像
     private String userimgpath;
     //手机号码

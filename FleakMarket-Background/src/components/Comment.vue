@@ -131,6 +131,7 @@
           name: this.formInline.name,
           sid: this.formInline.sid,
           deal: this.formInline.deal,
+          clicks: this.formInline.clicks,
           status: this.formInline.status
         }).then(res => {
           this.ProductData = res.data;

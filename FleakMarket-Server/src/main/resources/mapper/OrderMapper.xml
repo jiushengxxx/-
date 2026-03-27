@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ct.mapper.ForegroundMapper.OrderMapper" >
-    <insert id="insertOrderByOrder" parameterType="Order">
-        insert into orders(oid,cid,createperson,createtime,productnumber,producttotal,consignee,phone,mail,address
+
+    <!-- 插入订单 -->
+    <insert id="insertOrderByOrder" parameterType="com.ct.model.ForegroundModel.Order">
+        insert into orders(
+        oid,cid,createperson,createtime,productnumber,producttotal,consignee,phone,mail,address
         <if test="remark!=null and remark!=''">
             ,remark
         </if>
         )
-        value(#{oid},#{cid},#{createperson},#{createtime},#{productnumber},#{producttotal},#{consignee},#{phone},#{mail},#{address}
+        values(
+        #{oid},#{cid},#{createperson},#{createtime},#{productnumber},#{producttotal},#{consignee},#{phone},#{mail},#{address}
         <if test="remark!=null and remark!=''">
             ,#{remark}
         </if>
         )
     </insert>
 
+    <!-- 插入订单商品 -->
     <insert id="insertOrderProduct" parameterType="list">
         insert into order_product(oid,pid) values
         <foreach collection="list" item="item" index="index" separator=",">
@@ -21,7 +26,8 @@
         </foreach>
     </insert>
 
-    <resultMap id="resultOrderMap" type="Order">
+    <!-- 查询订单及商品信息映射 -->
+    <resultMap id="resultOrderMap" type="com.ct.model.ForegroundModel.Order">
         <result property="id" column="id" />
         <result property="oid" column="oid" />
         <result property="cid" column="cid" />
@@ -37,21 +43,29 @@
         <result property="address" column="address" />
         <result property="remark" column="remark" />
         <result property="status" column="status" />
-        
-        <collection property="products" ofType="Product" column="pid">
+
+        <collection property="products" ofType="com.ct.model.ForegroundModel.Product" column="pid">
             <id property="id" column="pid" javaType="int" jdbcType="INTEGER" />
             <result property="name" column="name" javaType="string" jdbcType="VARCHAR" />
             <result property="details" column="details" javaType="string" jdbcType="VARCHAR" />
             <result property="images" column="images" javaType="string" jdbcType="VARCHAR" />
             <result property="currentprice" column="currentprice" javaType="string" jdbcType="VARCHAR" />
+            <result property="originalprice" column="originalprice" javaType="string" jdbcType="VARCHAR" />
+            <result property="condition" column="condition" javaType="string" jdbcType="VARCHAR" />
         </collection>
     </resultMap>
+
+    <!-- 根据订单号查询订单 -->
     <select id="selectOrderById" parameterType="String" resultMap="resultOrderMap">
-        select o.*,p.id pid,p.name,p.details,p.images,p.currentprice from orders o,product p,order_product op where
-        o.oid = op.oid and p.id = op.pid and o.oid = #{value}
+        select o.*,p.id pid,p.name,p.details,p.images,p.currentprice,p.originalprice,p.`condition`
+        from orders o
+        join order_product op on o.oid = op.oid
+        join product p on p.id = op.pid
+        where o.oid = #{value}
     </select>
 
-    <update id="updateOrderByOid" parameterType="Order">
+    <!-- 根据订单号更新订单信息 -->
+    <update id="updateOrderByOid" parameterType="com.ct.model.ForegroundModel.Order">
         update orders
         <trim prefix="SET" suffixOverrides=",">
             <if test="pay!=null and pay!=''">
@@ -70,16 +84,26 @@
         where oid=#{oid}
     </update>
 
-    <delete id="deleteOrderByOid" parameterType="Order">
-        delete from orders where oid=#{oid};
-        delete from order_product where oid=#{oid};
+    <!-- 根据订单号删除订单 -->
+    <delete id="deleteOrderMainByOid" parameterType="String">
+        delete from orders where oid=#{value};
     </delete>
 
-    <select id="selectOrderByUserId" parameterType="Integer" resultType="Order">
-        select o.* from orders o,user u where o.createperson=u.username and u.id=#{value} order by o.createtime desc;
+    <delete id="deleteOrderProductByOid" parameterType="String">
+        delete from order_product where oid=#{value};
+    </delete>
+
+    <!-- 根据用户ID查询订单 -->
+    <select id="selectOrderByUserId" parameterType="Integer" resultType="com.ct.model.ForegroundModel.Order">
+        select o.*
+        from orders o
+        join user u on o.createperson = u.username
+        where u.id=#{value}
+        order by o.createtime desc
     </select>
 
-    <select id="selectOrderByList" resultType="Order">
+    <!-- 订单列表查询 -->
+    <select id="selectOrderByList" resultType="com.ct.model.ForegroundModel.Order">
         select * from orders where 1=1
         <if test="oid!=null">
             and oid like concat('%','${oid}','%')
@@ -92,25 +116,22 @@
         </if>
     </select>
 
+    <!-- 查询用户订单下的商品 -->
     <select id="selectOrderProductByUserId" parameterType="Integer" resultType="map">
         select
-            p.*,op.status opstatus,u.username,o.oid
+        p.*,op.status opstatus,u.username,o.oid
         from
-            order_product op,product p,orders o,user u
-        where
-            op.pid=p.id
-        and
-            op.oid=o.oid
-        and
-            o.createperson=u.username
-        and
-            u.id=#{value}
-        order by
-            o.createtime
-        desc;
+        order_product op
+        join product p on op.pid=p.id
+        join orders o on op.oid=o.oid
+        join user u on o.createperson=u.username
+        where u.id=#{value}
+        order by o.createtime desc;
     </select>
 
+    <!-- 更新订单商品状态 -->
     <update id="updateOrderById" parameterType="map">
         update order_product set status=#{status} where pid=#{pid} and oid=#{oid};
     </update>
+
 </mapper>

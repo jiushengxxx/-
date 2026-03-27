@@ -41,7 +41,7 @@ public class EmailController {
         String verifycode = flag.toString();
 
         //设置邮件内容
-        String mailText = "【唐院二手交易市场】 验证码："+verifycode+"   您正在注册唐院二手交易网站账号，请勿将验证码告诉他人哦。";
+        String mailText = "【蚌院二手交易市场】 验证码："+verifycode+"   您正在注册蚌院二手交易网站账号，请勿将验证码告诉他人哦。";
 
         if(!mailTo.isEmpty()){
             toMail(mailTo,mailText);
@@ -62,7 +62,7 @@ public class EmailController {
 
         List<Map<String,String>> list = service.selectProductDetail(map);
         for (Map<String, String> arr:list) {
-            String mailText = "您在【唐院二手市场】网站发布的《"+arr.get("name")+"》已出售";
+            String mailText = "您在【蚌院二手市场】网站发布的《"+arr.get("name")+"》已出售";
             toMail(arr.get("mail").toString(),mailText);
         }
     }
@@ -77,19 +77,19 @@ public class EmailController {
         Map<String,String> MapObject = service.selectProductDetailByOrder(map);
         int type = (int) map.get("status");
         if(type == 2){
-            String mailText = "【唐院二手市场】您购买的《"+MapObject.get("name")+"》已发货";
+            String mailText = "【蚌院二手市场】您购买的《"+MapObject.get("name")+"》已发货";
             toMail(MapObject.get("mail"),mailText);
         }else if(type == 3){
-            String mailText = "【唐院二手市场】您发布的《"+MapObject.get("name")+"》已送达";
+            String mailText = "【蚌院二手市场】您发布的《"+MapObject.get("name")+"》已送达";
             toMail(MapObject.get("mail"),mailText);
         }else if(type == 4){
-            String mailText = "【唐院二手市场】您出售的《"+MapObject.get("name")+"》正在申请退款，请及时处理！";
+            String mailText = "【蚌院二手市场】您出售的《"+MapObject.get("name")+"》正在申请退款，请及时处理！";
             toMail(MapObject.get("mail"),mailText);
         }else if(type == 5){
-            String mailText = "【唐院二手市场】您购买的《"+MapObject.get("name")+"》退款成功！";
+            String mailText = "【蚌院二手市场】您购买的《"+MapObject.get("name")+"》退款成功！";
             toMail(MapObject.get("mail"),mailText);
         }else if(type == 6){
-            String mailText = "【唐院二手市场】您购买的《"+MapObject.get("name")+"》退款失败！";
+            String mailText = "【蚌院二手市场】您购买的《"+MapObject.get("name")+"》退款失败！";
             toMail(MapObject.get("mail"),mailText);
         }
     }
@@ -102,9 +102,9 @@ public class EmailController {
      */
     public void toMail(String mailTo,String mailText){
         //定义发送标题
-        String title = "唐院二手交易市场";
+        String title = "蚌院二手交易市场";
         //设置发送方
-        String mailFrom = "t18713827231@163.com";
+        String mailFrom = "2750394702@qq.com";
         try {
             //构建邮件对象
             SimpleMailMessage message = new SimpleMailMessage();
