@@ -2,7 +2,7 @@
   <div class="orderContainer">
     <el-tabs v-model="activeName">
         <el-tab-pane label="待支付" name="待支付">
-          <el-row class="myOrderContainer" v-for="item in payedData" v-if="item.pay==1" :key="item.id">
+          <el-row class="myOrderContainer" v-for="item in payedData" :key="item.id" v-if="item && item.pay==1">
           	<el-col :span="11">
           		<div class="proName">订单编号: {{item.oid}}</div>
           		<div class="proDetail">创建日期: {{item.createtime}}</div>
@@ -153,10 +153,10 @@
             <el-col :span="3">商品状态</el-col>
             <el-col :span="4">操作</el-col>
           </el-row>
-          <el-row class="cartContainer" v-for="item in waitGetData" :key="item.id" v-if="item.opstatus==3" style="margin: 5px 0;">
+          <el-row class="cartContainer" v-for="item in waitGetData" :key="item.id" v-if="item && item.opstatus==3" style="margin: 5px 0;">
           	<el-col :span="3">
           		<div class="proImg">
-                <img :src="item.images[0]" alt="">
+                <img :src="item.images && item.images[0] ? item.images[0] : ''" alt="">
               </div>
           	</el-col>
           	<el-col :span="7">
@@ -400,10 +400,23 @@
     methods: {
       //加载订单列表
       loadMyOrder(){
-        this.$axios.get('/order/selectOrderByUserId',{
-          params: {userid: this.$store.state.userid}
-        }).then(res => {
-          this.payedData = res.data;
+        const userid = this.$store.state.userid;
+        if (!userid || userid <= 0) {
+          console.error('用户ID无效:', userid);
+          this.payedData = [];
+          return;
+        }
+        this.$axios.get(`/order/user/${userid}`).then(res => {
+          const responseData = res.data;
+          if (responseData && responseData.code === 200 && Array.isArray(responseData.data)) {
+            this.payedData = responseData.data.filter(item => item !== null && item !== undefined);
+          } else {
+            this.payedData = [];
+            console.warn('订单数据为空或格式错误:', responseData);
+          }
+        }).catch(err => {
+          console.error('加载订单失败:', err);
+          this.payedData = [];
         });
       },
       //导入我的订单商品
@@ -411,12 +424,26 @@
         this.$axios.get('/order/selectOrderProductByUserId',{
           params: {userid: this.$store.state.userid}
         }).then(res => {
-          res.data.forEach((res,index) => {
-            if(res.images != null){
-              res.images = eval('('+res.images+')');
-            }
-          });
-          this.waitGetData = res.data;
+          const responseData = res.data;
+          if (responseData && responseData.code === 200 && responseData.data && Array.isArray(responseData.data)) {
+            responseData.data.forEach((item, index) => {
+              if(item && item.images != null){
+                try {
+                  item.images = eval('('+item.images+')');
+                } catch(e) {
+                  console.error('图片数据解析失败:', e);
+                  item.images = [];
+                }
+              }
+            });
+            this.waitGetData = responseData.data.filter(item => item !== null && item !== undefined);
+          } else {
+            this.waitGetData = [];
+            console.warn('订单商品数据为空或格式错误:', responseData);
+          }
+        }).catch(err => {
+          console.error('加载订单商品失败:', err);
+          this.waitGetData = [];
         });
       },
       //订单详情
@@ -522,13 +549,16 @@
           oid: oid,
           status: status
         }).then(res => {
-          if(res.data==1){
+          const responseData = res.data;
+          if(responseData && responseData.code === 200 && responseData.data == 1){
             this.$message({
               message: message,
               type: 'success'
             });
           }
           this.loadMyOrderProduct();
+        }).catch(err => {
+          console.error('更新订单状态失败:', err);
         });
 
         //邮件提示买家

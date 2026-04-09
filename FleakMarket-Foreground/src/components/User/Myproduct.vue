@@ -532,12 +532,56 @@ export default {
           id: this.$store.state.userid
         }
       }).then(res => {
-        res.data.forEach((res, index) => {
-          if (res.images != null) {
-            res.images = eval('(' + res.images + ')');
-          }
-        });
-        this.Data = res.data;
+        const responseData = res.data;
+        if (responseData && responseData.code === 200 && Array.isArray(responseData.data)) {
+          // 处理图片数据
+          responseData.data.forEach((item, index) => {
+            if (item && item.images != null) {
+              try {
+                item.images = eval('(' + item.images + ')');
+              } catch(e) {
+                console.error('图片数据解析失败:', e);
+                item.images = [];
+              }
+            }
+          });
+
+          // 去重：使用 Map 根据 id 去重，保留最新的数据
+          const uniqueMap = new Map();
+          responseData.data.forEach(item => {
+            if (item && item.id) {
+              uniqueMap.set(item.id, item);
+            }
+          });
+          this.Data = Array.from(uniqueMap.values());
+        } else if (Array.isArray(responseData)) {
+          // 兼容直接返回数组的情况
+          responseData.forEach((item, index) => {
+            if (item && item.images != null) {
+              try {
+                item.images = eval('(' + item.images + ')');
+              } catch(e) {
+                console.error('图片数据解析失败:', e);
+                item.images = [];
+              }
+            }
+          });
+
+          // 去重
+          const uniqueMap = new Map();
+          responseData.forEach(item => {
+            if (item && item.id) {
+              uniqueMap.set(item.id, item);
+            }
+          });
+          this.Data = Array.from(uniqueMap.values());
+        } else {
+          this.Data = [];
+          console.warn('商品数据为空或格式错误:', responseData);
+        }
+      }).catch(err => {
+        console.error('加载商品数据失败:', err);
+        this.Data = [];
       });
     },
     //加载商品详情信息
@@ -757,12 +801,15 @@ export default {
         status: 1
       }).then(res => {
         this.loadMyProduct();
-        if (res.data == 1) {
+        const responseData = res.data;
+        if (responseData && (responseData == 1 || (responseData.code === 200 && responseData.data == 1))) {
           this.$message({
             message: '发布成功！',
             type: 'success'
           });
         }
+      }).catch(err => {
+        console.error('发布商品失败:', err);
       });
     },
     //统计点击量
@@ -771,19 +818,38 @@ export default {
       this.$axios.post('/utils/selectDateFromStatis', {
         dates: moment().format('YYYY-MM-DD')
       }).then(res => {
-        if (res.data.length == 0) {
-          //如果数据库不存在今天的数据，插入今天日期与默认点击量
-          this.$axios.post('/utils/insertDateInStatis', {
-            dates: moment().format('YYYY-MM-DD'),
-          });
-        } else {
-          //如果数据库存在今天的数据，获取当日点击量+1
-          this.$axios.post('/utils/updateNumInStatis', {
-            id: res.data.id,
-            visitNum: res.data.visitNum,
-            clickNum: (res.data.clickNum + 1)
-          });
+        const responseData = res.data;
+        if (responseData && responseData.code === 200 && Array.isArray(responseData.data)) {
+          if (responseData.data.length == 0) {
+            //如果数据库不存在今天的数据，插入今天日期与默认点击量
+            this.$axios.post('/utils/insertDateInStatis', {
+              dates: moment().format('YYYY-MM-DD'),
+            });
+          } else {
+            //如果数据库存在今天的数据，获取当日点击量+1
+            const statData = responseData.data[0] || responseData.data;
+            this.$axios.post('/utils/updateNumInStatis', {
+              id: statData.id,
+              visitNum: statData.visitNum,
+              clickNum: (statData.clickNum + 1)
+            });
+          }
+        } else if (Array.isArray(responseData)) {
+          if (responseData.length == 0) {
+            this.$axios.post('/utils/insertDateInStatis', {
+              dates: moment().format('YYYY-MM-DD'),
+            });
+          } else {
+            const statData = responseData[0];
+            this.$axios.post('/utils/updateNumInStatis', {
+              id: statData.id,
+              visitNum: statData.visitNum,
+              clickNum: (statData.clickNum + 1)
+            });
+          }
         }
+      }).catch(err => {
+        console.error('统计点击量失败:', err);
       });
     }
   }
